@@ -539,6 +539,21 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/mpu/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/ds18b20/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/pwm/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/main/cmake_install.cmake")
 endif()
 

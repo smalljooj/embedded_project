@@ -81,4 +81,7 @@ $<TARGET_FILE:__idf_nvs_sec_provider>
 $<TARGET_FILE:__idf_spiffs>
 $<TARGET_FILE:__idf_wifi_provisioning>
 $<TARGET_FILE:__idf_oled_display>
+$<TARGET_FILE:__idf_mpu>
+$<TARGET_FILE:__idf_ds18b20>
+$<TARGET_FILE:__idf_pwm>
 $<TARGET_FILE:__idf_main>

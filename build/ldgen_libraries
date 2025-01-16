@@ -81,4 +81,7 @@ C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/nvs_sec_
 C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/spiffs/libspiffs.a
 C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/oled_display/liboled_display.a
+C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/mpu/libmpu.a
+C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/ds18b20/libds18b20.a
+C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/pwm/libpwm.a
 C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/main/libmain.a
