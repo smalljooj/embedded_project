@@ -1,27 +1,27 @@
 # embedded_project
 Final project of embedded discipline, in which the main idea was to create drivers of OLED display, MPU, PWM and DS18B20 for the ESP32, and with them make a project.
 
-Biblioteca para o MPU6050
+## Biblioteca para o MPU6050
 
-Descrição Geral
+### Descrição Geral
+
 Esta biblioteca foi projetada para controlar e ler dados do sensor MPU6050 (um acelerômetro e giroscópio de 6 eixos) usando comunicação I²C. Ela fornece funções para inicializar o sensor, configurar os registradores, calcular erros iniciais, ler valores brutos de aceleração e giroscópio e calcular ângulos usando o filtro de Kalman.
 
-Funções
+### Funções
 1. mpu6050_init()
 Descrição: Inicializa o MPU6050, configurando o registrador de gerenciamento de energia (PWR_MGMT_1) para desativar o modo de suspensão.
 Entradas: Nenhuma.
 Saída: Nenhuma.
-
 Log: Exibe mensagens indicando sucesso ou falha na inicialização.
 
 2. mpu6050_configure_sensors()
+
 Descrição: Configura o acelerômetro (±2g) e o giroscópio (±250°/s).
 Entradas: Nenhuma.
 Saída: Nenhuma.
 Log: Exibe mensagens indicando sucesso ou falha na configuração de cada sensor.
 
 3. init_mpu6050()
-
 Descrição: Chama as funções de inicialização e configuração do sensor. Calcula os erros iniciais do acelerômetro e do giroscópio com base em 500 amostras.
 Entradas: Nenhuma.
 Saída: Nenhuma.
@@ -88,7 +88,7 @@ void app_main() {
     }
 }
 
-Notas
+# Notas
 O cálculo dos erros iniciais (accError e gyrError) deve ser feito com o sensor estático para minimizar ruídos.
 A biblioteca utiliza o FreeRTOS para tarefas assíncronas (vTaskDelay).
 Verifique as conexões do barramento I²C antes de utilizar o código.
