@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/ismae/Documents/espressif/workspace/oled_display/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/Users/anali/projeto_embarcados/embedded_project/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)
