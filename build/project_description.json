@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "oled_display",
-    "project_version":    "00706ff-dirty",
+    "project_version":    "bbe9473-dirty",
     "project_path":       "C:/Users/ismae/Documents/espressif/workspace/oled_display",
     "idf_path":           "C:/Users/ismae/Documents/espressif/path/v5.3.2/esp-idf",
     "build_dir":          "C:/Users/ismae/Documents/espressif/workspace/oled_display/build",
