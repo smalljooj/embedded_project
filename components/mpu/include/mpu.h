@@ -23,10 +23,12 @@ typedef struct {
     float P[2][2]; // Matriz de covariância de erro
 } Kalman;
 
+
 void func(void);
-void mpu6050_init(void);
-void mpu6050_configure_sensors(void);
-void init_mpu6050(void);
+void scan_i2c_bus(void);
+esp_err_t  mpu6050_init(void);
+esp_err_t mpu6050_configure_sensors(void);
+esp_err_t init_mpu6050(void);
 Angles calculate_angles_task();
 void kalman_init(Kalman *kalman);
 float kalman_update(Kalman *kalman, float new_angle, float new_rate, float dt);

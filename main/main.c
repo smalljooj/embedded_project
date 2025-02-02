@@ -28,14 +28,61 @@ int app_main() {
     Angles angles;
 
     i2c_init();
-    init_mpu6050();
+    //scan_i2c_bus();
+
+    while (true)
+    {
+        esp_err_t ret = init_mpu6050();
+        if(ret == ESP_OK){
+            break;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10000));
+    }
+    
+    
 
     while (1){
+
+        //mpu6050_read_gyro_x();
         angles = calculate_angles_task();
         vTaskDelay(pdMS_TO_TICKS(500));
 
+        if ( isnan(angles.pitch) || isnan(angles.roll) ) 
+        {
+            while (true)
+            {
+                esp_err_t ret = init_mpu6050();
+                if(ret == ESP_OK){
+                    break;
+                }
+
+                vTaskDelay(pdMS_TO_TICKS(10000));
+            }
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
 
+    //while(1){
+        /*vTaskDelay(5);
+        mpu6050_read_gyro_x();
+        vTaskDelay(1);
+        mpu6050_read_gyro_y();
+        vTaskDelay(1);
+        mpu6050_read_gyro_z();
+
+        vTaskDelay(500);
+
+        mpu6050_read_accel_x();
+        vTaskDelay(1);
+        mpu6050_read_accel_y();
+        vTaskDelay(1);
+        mpu6050_read_accel_z();
+        vTaskDelay(5);*/
+    //}
+
+    return 0;
     //oled_display_init();
     //vTaskDelay(1000 / portTICK_PERIOD_MS);
 
@@ -54,6 +101,4 @@ int app_main() {
     */
    //oled_display_write_text("Hello, are you \nok?", 19);
    //oled_display_update_buffer();
-
-    return 0;
 }

@@ -37,7 +37,18 @@ float gyrRaw[3], gyrAngle[3], gyrError[3];
 float yaw = 0, pitch = 0, roll = 0;
 uint32_t prevtime = 0, time = 0;
 
-void mpu6050_init(void) {
+void scan_i2c_bus() {
+    printf("Scanning I2C bus...\n");
+    for (uint8_t addr = 1; addr < 127; addr++) {
+        if (i2c_master_write_to_device(I2C_NUM_0, addr, NULL, 0, pdMS_TO_TICKS(100)) == ESP_OK) {
+            printf("Device found at address 0x%02X\n", addr);
+        }
+    }
+    printf("I2C scan complete.\n");
+}
+
+
+esp_err_t  mpu6050_init(void) {
     // Create I2C command link
     i2c_cmd_handle_t link = i2c_cmd_link_create();
 
@@ -58,17 +69,21 @@ void mpu6050_init(void) {
 
     // Execute I2C command and check for success
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, link, pdMS_TO_TICKS(1000));
+
+    // Delete I2C command link
+    i2c_cmd_link_delete(link);
+
     if (ret == ESP_OK) {
         ESP_LOGI("mpu6050", "Wake-up successful");
     } else {
         ESP_LOGE("mpu6050", "Wake-up failed: %s", esp_err_to_name(ret));
+        return ret;
     }
 
-    // Delete I2C command link
-    i2c_cmd_link_delete(link);
+    return ESP_OK;
 }
 
-void mpu6050_configure_sensors(void) {
+esp_err_t mpu6050_configure_sensors(void) {
     // Create I2C command link
     i2c_cmd_handle_t link = i2c_cmd_link_create();
 
@@ -102,21 +117,30 @@ void mpu6050_configure_sensors(void) {
 
     // Execute I2C command for gyroscope and check for success
     ret = i2c_master_cmd_begin(I2C_NUM_0, link, pdMS_TO_TICKS(1000));
-    if (ret == ESP_OK) {
-        ESP_LOGI("mpu6050", "Gyroscope configured successfully.");
-    } else {
-        ESP_LOGE("mpu6050", "Failed to configure gyroscope: %s", esp_err_to_name(ret));
-    }
 
     // Delete I2C command link
     i2c_cmd_link_delete(link);
 
+    if (ret == ESP_OK) {
+        ESP_LOGI("mpu6050", "Gyroscope configured successfully.");
+    } else {
+        ESP_LOGE("mpu6050", "Failed to configure gyroscope: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    return ESP_OK;
 }
 
 // Inicialização do MPU6050
-void init_mpu6050() {
-    mpu6050_init();
-    mpu6050_configure_sensors();
+esp_err_t init_mpu6050() {
+    esp_err_t ret = mpu6050_init();
+    if(ret  != ESP_OK ){
+        return ret;
+    }
+    ret = mpu6050_configure_sensors();
+    if(ret  != ESP_OK ){
+        return ret;
+    }
 
     ESP_LOGI(TAG, "Calculando erros iniciais...");
     // Calcular erros de acelerômetro -> dispositivo deve estar parado
@@ -152,6 +176,7 @@ void init_mpu6050() {
     gyrError[2] /= 500.0;
 
     ESP_LOGI(TAG, "Erros iniciais calculados.");
+    return ESP_OK;
 }
 
 // Funções para inicializar e atualizar o filtro de Kalman
@@ -201,7 +226,8 @@ Angles calculate_angles_task() {
     static Kalman kalman_roll, kalman_pitch;
     static bool kalman_initialized = false;
 
-    if (!kalman_initialized) {
+// Se os filtros ainda não foram inicializados ou os valores são inválidos, reinicializa
+    if (!kalman_initialized || isnan(kalman_roll.angle) || isnan(kalman_pitch.angle)) {
         kalman_init(&kalman_roll);
         kalman_init(&kalman_pitch);
         kalman_initialized = true;
@@ -212,6 +238,10 @@ Angles calculate_angles_task() {
     prevtime = time;
     time = xTaskGetTickCount() * portTICK_PERIOD_MS;
     float dt = (time - prevtime) / 1000.0;
+
+    if (dt == 0) {
+    dt = 0.001; // Pequeno valor para evitar divisão por zero
+    }
 
     // Leitura do acelerômetro
     accRaw[0] = mpu6050_read_accel_x();
@@ -265,6 +295,7 @@ float mpu6050_read_gyro_x(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         gyro_x = (int16_t)((data[0] << 8) | data[1]);
+        ESP_LOGI("mpu6050", "Gyro X: %f",(float) gyro_x / (131.0));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -311,7 +342,7 @@ float mpu6050_read_gyro_y(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         gyro_y = (int16_t)((data[0] << 8) | data[1]);
-        //ESP_LOGI("mpu6050", "Gyro Y: %f",(float) gyro_y / (131.0));
+        ESP_LOGI("mpu6050", "Gyro Y: %f",(float) gyro_y / (131.0));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -355,7 +386,7 @@ float mpu6050_read_gyro_z(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         gyro_z = (int16_t)((data[0] << 8) | data[1]);
-        //ESP_LOGI("mpu6050", "Gyro Z: %f", (float) gyro_z / (131.0));
+        ESP_LOGI("mpu6050", "Gyro Z: %f", (float) gyro_z / (131.0));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -401,7 +432,7 @@ float mpu6050_read_accel_x(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         accel_x = (int16_t)((data[0] << 8) | data[1]);
-        //ESP_LOGI("mpu6050", "Accel X: %f", (float) accel_x/ (16384));
+        ESP_LOGI("mpu6050", "Accel X: %f", (float) accel_x/ (16384));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -446,7 +477,7 @@ float mpu6050_read_accel_y(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         accel_y = (int16_t)((data[0] << 8) | data[1]);
-        //ESP_LOGI("mpu6050", "Accel Y: %f", (float) accel_y/ (16384));
+        ESP_LOGI("mpu6050", "Accel Y: %f", (float) accel_y/ (16384));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -489,11 +520,11 @@ float mpu6050_read_accel_z(void) {
     i2c_master_stop(link);
 
     // Executa o comando
-    esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, link, pdMS_TO_TICKS(100));
+    esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, link, pdMS_TO_TICKS(1000));
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         accel_z = (int16_t)((data[0] << 8) | data[1]);
-        //ESP_LOGI("mpu6050", "Accel Z: %f", (float) accel_z/ (16384));
+        ESP_LOGI("mpu6050", "Accel Z: %f", (float) accel_z/ (16384));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
