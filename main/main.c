@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <oled_display.h>
+#include <mpu.h>
+#include <setjmp.h>
+
 
 void i2c_init(void) {
     i2c_config_t conf = {
@@ -20,15 +23,25 @@ void i2c_init(void) {
         ESP_LOGI("i2c error", "failed to install the i2c driver");
 }
 
-void app_main() {
-    i2c_init();
 
-    oled_display_init();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+int app_main() {
+    Angles angles;
+
+    i2c_init();
+    init_mpu6050();
+
+    while (1){
+        angles = calculate_angles_task();
+        vTaskDelay(pdMS_TO_TICKS(500));
+
+    }
+
+    //oled_display_init();
+    //vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     // select the entire display
-    oled_display_set_column_addresses(0, 127);
-    oled_display_set_page_addresses(0, 7);
+    //oled_display_set_column_addresses(0, 127);
+    //oled_display_set_page_addresses(0, 7);
 
     /*
     oled_display_draw_pixel(0, 0, 1);
@@ -39,6 +52,8 @@ void app_main() {
 
     oled_display_update_buffer();
     */
-   oled_display_write_text("Hello, are you \nok?", 19);
-   oled_display_update_buffer();
+   //oled_display_write_text("Hello, are you \nok?", 19);
+   //oled_display_update_buffer();
+
+    return 0;
 }
