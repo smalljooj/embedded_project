@@ -3,7 +3,6 @@
 #include <mpu.h>
 #include <setjmp.h>
 
-
 void i2c_init(void) {
     i2c_config_t conf = {
     .mode = I2C_MODE_MASTER,
