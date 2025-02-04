@@ -8,7 +8,7 @@
 ### Módulos Utilizados
 
 - [MPU 6050](./components/mpu/mpu_component_doc.md)
-- [Display Oled SSD1306]()
+- [Display Oled SSD1306](./components/oled_display/oled_component_doc.md)
 - [DS18B20]()
 - [PWM]()
 
