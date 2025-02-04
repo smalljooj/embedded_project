@@ -25,80 +25,35 @@ void i2c_init(void) {
 
 
 int app_main() {
-    Angles angles;
-
     i2c_init();
-    //scan_i2c_bus();
-
-    while (true)
-    {
-        esp_err_t ret = init_mpu6050();
-        if(ret == ESP_OK){
-            break;
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(10000));
-    }
-    
-    
-
+    /*
+    Angles angles;
+    init_mpu6050();
     while (1){
-
-        //mpu6050_read_gyro_x();
         angles = calculate_angles_task();
         vTaskDelay(pdMS_TO_TICKS(500));
 
-        if ( isnan(angles.pitch) || isnan(angles.roll) ) 
-        {
-            while (true)
-            {
-                esp_err_t ret = init_mpu6050();
-                if(ret == ESP_OK){
-                    break;
-                }
-
-                vTaskDelay(pdMS_TO_TICKS(10000));
-            }
-        }
-        
-        vTaskDelay(pdMS_TO_TICKS(250));
     }
+    */
 
-    //while(1){
-        /*vTaskDelay(5);
-        mpu6050_read_gyro_x();
-        vTaskDelay(1);
-        mpu6050_read_gyro_y();
-        vTaskDelay(1);
-        mpu6050_read_gyro_z();
-
-        vTaskDelay(500);
-
-        mpu6050_read_accel_x();
-        vTaskDelay(1);
-        mpu6050_read_accel_y();
-        vTaskDelay(1);
-        mpu6050_read_accel_z();
-        vTaskDelay(5);*/
-    //}
-
-    return 0;
-    //oled_display_init();
-    //vTaskDelay(1000 / portTICK_PERIOD_MS);
+    oled_display_init();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     // select the entire display
-    //oled_display_set_column_addresses(0, 127);
-    //oled_display_set_page_addresses(0, 7);
+    oled_display_set_column_addresses(0, 127);
+    oled_display_set_page_addresses(0, 7);
 
-    /*
-    oled_display_draw_pixel(0, 0, 1);
-    oled_display_draw_pixel(0, 2, 1);
-    oled_display_draw_pixel(2, 0, 1);
-    oled_display_draw_pixel(1, 1, 1);
-    oled_display_draw_pixel(2, 2, 1);
-
+    oled_display_set_cursor(0, 0);
+    oled_display_write_text("Hello, are you \nok?", 19);
+    oled_display_draw_line(0, 25, 127, 25);
+    oled_display_draw_rectangle(35, 35, 55, 55);
+    oled_display_draw_triangle(70, 55, 100, 55, 85, 35);
     oled_display_update_buffer();
-    */
-   //oled_display_write_text("Hello, are you \nok?", 19);
-   //oled_display_update_buffer();
+    while(1)
+    {
+        oled_display_check();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+    return 0;
 }
