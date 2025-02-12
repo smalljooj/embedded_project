@@ -2,6 +2,7 @@
 #include <oled_display.h>
 #include <mpu.h>
 #include <setjmp.h>
+#include <ds18b20.h>
 
 void i2c_init(void) {
     i2c_config_t conf = {
@@ -23,8 +24,27 @@ void i2c_init(void) {
 }
 
 
-int app_main() {
+int app_main() 
+{
     i2c_init();
+
+    ds18b20_init();
+    while(1)
+    {
+        float temperature = ds18b20_read_temperature(CELSIUS);
+        printf("Temperatura: %.2f °C\n", temperature);
+        
+        temperature = ds18b20_read_temperature(FAHRENHEIT);
+        printf("Temperatura: %.2f °F\n", temperature);
+    
+        temperature = ds18b20_read_temperature(KELVIN);
+        printf("Temperatura: %.2f K\n\n", temperature);
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
+
+
     /*
     Angles angles;
     init_mpu6050();
@@ -33,7 +53,7 @@ int app_main() {
         vTaskDelay(pdMS_TO_TICKS(500));
 
     }
-    */
+    
 
     oled_display_init();
     vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -53,6 +73,6 @@ int app_main() {
         oled_display_check();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
-
+    */
     return 0;
 }
