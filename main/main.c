@@ -29,16 +29,19 @@ int app_main()
     i2c_init();
 
     ds18b20_init();
+    ds18b20_read_addresses();
     while(1)
     {
-        float temperature = ds18b20_read_temperature(CELSIUS);
+        float temperature = ds18b20_read_temperature_addr(CELSIUS, 0);
         printf("Temperatura: %.2f °C\n", temperature);
         
+        /*
         temperature = ds18b20_read_temperature(FAHRENHEIT);
         printf("Temperatura: %.2f °F\n", temperature);
     
         temperature = ds18b20_read_temperature(KELVIN);
         printf("Temperatura: %.2f K\n\n", temperature);
+        */
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
