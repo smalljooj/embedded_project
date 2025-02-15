@@ -6,9 +6,11 @@
 #include <rom/ets_sys.h>
 #include <esp_log.h>
 
-uint64_t addressess[5] = { 0, 0, 0, 0, 0};
-uint8_t branchs[64];
-uint8_t conflicts;
+uint64_t addressess[5] = {0, 0, 0, 0, 0};
+int8_t branchs[64] = {0};
+int8_t last_branch = 0;
+int8_t conflicts;
+int8_t current_conflicts;
 
 void ds18b20_read_addresses()
 {
@@ -20,23 +22,60 @@ void ds18b20_read_addresses()
 
     uint64_t bit;
     uint8_t complement;
-
-    for(int i = 0; i < 64; i++)
+    uint8_t addr_count = 0;
+    do 
     {
-        bit = ds18b20_read_bit();
-        complement = ds18b20_read_bit();
-
-        if ((bit ^ 1) == complement)
+        for(int i = 0; i < 64; i++)
         {
-            addressess[0] |= bit << i;
-            printf("%llu", bit);
-        }
-        else 
-        {
+            bit = ds18b20_read_bit();
+            complement = ds18b20_read_bit();
 
+            if ((bit ^ 1) == complement)
+            {
+                addressess[addr_count] |= bit << i;
+                ds18b20_write_bit(bit);
+            }
+            else 
+            {
+               current_conflicts++;
+               if(conflicts == current_conflicts || branchs[i] == 1)
+               {
+                    ds18b20_write_bit(1);
+                    if (branchs[i] == -1)
+                    {
+                        branchs[i] = 0;
+                        branchs[last_branch] = -1;
+                        current_conflicts--;
+                    }
+                    else
+                    {
+                        addressess[addr_count] |= 1;
+                        branchs[i] = 1; 
+                        last_branch = i;
+                    }
+               }
+               else 
+               {
+                    ds18b20_write_bit(0); 
+               }
+            }
         }
-        ds18b20_write_bit(bit);
+        if(addressess[addr_count] != addressess[addr_count - 1])
+            addr_count++;
+        if (conflicts == current_conflicts)
+        {
+            branchs[last_branch] = -1;
+            current_conflicts--;
+        }
+        conflicts = current_conflicts;
+        current_conflicts = 0;
+        if (!ds18b20_restart()) {
+            ESP_LOGI("ds18b20", "Fail to initiate the conversion.");
+            return;
+        }
+        ds18b20_write_byte(0xF0);  // Search Rom
     }
+    while(conflicts);
     printf("\n");
     printf("%llx\n", addressess[0]);
 }
