@@ -6,7 +6,7 @@
 #include <rom/ets_sys.h>
 #include <esp_log.h>
 
-uint64_t addressess[5] = {0, 0, 0, 0, 0};
+uint64_t addresses[5] = {0, 0, 0, 0, 0};
 int8_t branchs[64] = {0};
 int8_t last_branch = 0;
 int8_t conflicts;
@@ -32,7 +32,7 @@ void ds18b20_read_addresses()
 
             if ((bit ^ 1) == complement)
             {
-                addressess[addr_count] |= bit << i;
+                addresses[addr_count] |= bit << i;
                 ds18b20_write_bit(bit);
             }
             else 
@@ -41,7 +41,7 @@ void ds18b20_read_addresses()
                if(conflicts == current_conflicts || branchs[i] == 1)
                {
                     ds18b20_write_bit(1);
-                    addressess[addr_count] |= 1 << i;
+                    addresses[addr_count] |= 1 << i;
                     if (branchs[i] == -1)
                     {
                         branchs[i] = 0;
@@ -60,7 +60,7 @@ void ds18b20_read_addresses()
                }
             }
         }
-        if(addressess[addr_count] != addressess[addr_count - 1])
+        if(addresses[addr_count] != addresses[addr_count - 1])
             addr_count++;
         if (conflicts == current_conflicts)
         {
@@ -77,9 +77,13 @@ void ds18b20_read_addresses()
         if(conflicts < 0) conflicts = 0;
     }
     while(conflicts);
+}
+
+void ds18b20_adresses_print()
+{
     printf("\n");
     for(int i = 0; i < addr_count; i++)
-        printf("%d - %llx\n", i, addressess[0]);
+        printf("%d - %llx\n", i, addresses[0]);
 }
 
 uint8_t ds18b20_get_address_count(void)
@@ -207,7 +211,7 @@ float ds18b20_read_temperature_addr(temperature_type type, uint8_t addr_number) 
 
     ds18b20_write_byte(0x55);  // Match Rom
     for(int i = 0; i < 64; i++)
-        ds18b20_write_bit((addressess[addr_number] >> i) & 0x01);
+        ds18b20_write_bit((addresses[addr_number] >> i) & 0x01);
     ds18b20_write_byte(0xBE);  // start reading
 
     // read the conversion data

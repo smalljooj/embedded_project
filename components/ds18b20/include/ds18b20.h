@@ -19,5 +19,6 @@ float ds18b20_read_temperature(temperature_type type);
 void ds18b20_read_addresses(void);
 float ds18b20_read_temperature_addr(temperature_type type, uint8_t addr_number);
 uint8_t ds18b20_get_address_count(void);
+void ds18b20_adresses_print(void);
 
 #endif

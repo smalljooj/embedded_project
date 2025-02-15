@@ -31,7 +31,7 @@ int app_main()
     ds18b20_init();
     ds18b20_read_addresses();
     uint8_t address_count = ds18b20_get_address_count();
-    printf("number of addressess: %d\n", address_count);
+    ds18b20_adresses_print();
     float temperature;
     while(1)
     {
@@ -41,6 +41,7 @@ int app_main()
             printf("Temperatura: %.2f °C\n", temperature);
         }
         printf("\n");
+        ds18b20_read_addresses();
         address_count = ds18b20_get_address_count();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
