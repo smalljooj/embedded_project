@@ -15,6 +15,7 @@ uint8_t addr_count = 0;
 
 void ds18b20_read_addresses()
 {
+    addr_count = 0;
     if (!ds18b20_restart()) {
         ESP_LOGI("ds18b20", "Fail to initiate the conversion.");
         return;
