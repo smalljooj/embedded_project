@@ -11,6 +11,7 @@ int8_t branchs[64] = {0};
 int8_t last_branch = 0;
 int8_t conflicts;
 int8_t current_conflicts;
+uint8_t addr_count = 0;
 
 void ds18b20_read_addresses()
 {
@@ -22,7 +23,6 @@ void ds18b20_read_addresses()
 
     uint64_t bit;
     uint8_t complement;
-    uint8_t addr_count = 0;
     do 
     {
         for(int i = 0; i < 64; i++)
@@ -41,6 +41,7 @@ void ds18b20_read_addresses()
                if(conflicts == current_conflicts || branchs[i] == 1)
                {
                     ds18b20_write_bit(1);
+                    addressess[addr_count] |= 1 << i;
                     if (branchs[i] == -1)
                     {
                         branchs[i] = 0;
@@ -49,7 +50,6 @@ void ds18b20_read_addresses()
                     }
                     else
                     {
-                        addressess[addr_count] |= 1;
                         branchs[i] = 1; 
                         last_branch = i;
                     }
@@ -74,10 +74,17 @@ void ds18b20_read_addresses()
             return;
         }
         ds18b20_write_byte(0xF0);  // Search Rom
+        if(conflicts < 0) conflicts = 0;
     }
     while(conflicts);
     printf("\n");
-    printf("%llx\n", addressess[0]);
+    for(int i = 0; i < addr_count; i++)
+        printf("%d - %llx\n", i, addressess[0]);
+}
+
+uint8_t ds18b20_get_address_count(void)
+{
+    return addr_count;
 }
 
 // init the ds18b20 and check if it's avaliable

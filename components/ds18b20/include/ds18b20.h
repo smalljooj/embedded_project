@@ -16,8 +16,8 @@ void ds18b20_write_byte(uint8_t byte);
 uint8_t ds18b20_read_bit(void);
 uint8_t ds18b20_read_byte(void);
 float ds18b20_read_temperature(temperature_type type);
-void ds18b20_read_addresses();
+void ds18b20_read_addresses(void);
 float ds18b20_read_temperature_addr(temperature_type type, uint8_t addr_number);
-
+uint8_t ds18b20_get_address_count(void);
 
 #endif
