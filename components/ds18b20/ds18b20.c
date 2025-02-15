@@ -17,7 +17,6 @@ void ds18b20_read_addresses()
 {
     addr_count = 0;
     if (!ds18b20_restart()) {
-        ESP_LOGI("ds18b20", "Fail to initiate the conversion.");
         return;
     }
     ds18b20_write_byte(0xF0);  // Search Rom
@@ -71,7 +70,6 @@ void ds18b20_read_addresses()
         conflicts = current_conflicts;
         current_conflicts = 0;
         if (!ds18b20_restart()) {
-            ESP_LOGI("ds18b20", "Fail to initiate the conversion.");
             return;
         }
         ds18b20_write_byte(0xF0);  // Search Rom
