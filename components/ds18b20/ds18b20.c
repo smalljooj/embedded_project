@@ -82,7 +82,7 @@ void ds18b20_adresses_print()
 {
     printf("\n");
     for(int i = 0; i < addr_count; i++)
-        printf("%d - %llx\n", i, addresses[0]);
+        printf("%d - %llx\n", i, addresses[i]);
 }
 
 uint8_t ds18b20_get_address_count(void)
@@ -176,7 +176,7 @@ float ds18b20_read_temperature(temperature_type type) {
     }
 
     ds18b20_write_byte(0xCC);  // ROM ignore
-    ds18b20_write_byte(0xBE);  // start reading
+    ds18b20_write_byte(0xBE);  // Read Scratchpad
 
     // read the conversion data
     uint8_t temp_lsb = ds18b20_read_byte();
