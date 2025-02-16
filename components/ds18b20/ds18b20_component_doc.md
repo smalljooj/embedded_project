@@ -10,18 +10,13 @@ Esta biblioteca foi desenvolvida para a comunicação com o sensor DS18B20 por m
     ds18b20_read_addresses();
     uint8_t address_count = ds18b20_get_address_count();
     float temperature;
-    while(1)
+    for(int i = 0; i < address_count; i++)
     {
-        for(int i = 0; i < address_count; i++)
-        {
-            temperature = ds18b20_read_temperature_addr(CELSIUS, i);
-            printf("Temperatura: %.2f °C\n", temperature);
-        }
-        printf("\n");
-        ds18b20_read_addresses();
-        address_count = ds18b20_get_address_count();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        temperature = ds18b20_read_temperature_addr(CELSIUS, i);
+        printf("Temperatura: %.2f °C\n", temperature);
     }
+    printf("\n");
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
 ### Funções
 
