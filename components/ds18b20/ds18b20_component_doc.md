@@ -77,7 +77,7 @@ Descrição: Realiza a leitura de um byte enviado pelo sensor.
 Entrada: Recebe uma unidade de temperatura (CELSIUS / KELVIN / FAHRENHEIT).
 Saída: Retorna a temperatura do sensor na unidade escolhida.
 Log:Exibe uma mensagem caso não encontre o sensor ou a conversão falhe.
-Descrição: Realiza a leitura da temperatura quando há apenas um sensor no barramento. Utiliza os seguintes comandos
+Descrição: Realiza a leitura da temperatura quando há apenas um sensor no barramento. Utiliza os seguintes comandoss
 
     SKIP ROM (0xCC): Evita a identificação de sensores individuais.
 
