@@ -1,11 +1,12 @@
 {
     "C_Cpp.intelliSenseEngine": "default",
-    "idf.espIdfPathWin": "c:\\ESPX\\ESPRESSIF\\v5.3.2\\esp-idf",
+    "idf.espIdfPathWin": "C:\\Users\\arthu\\esp\\v5.3.1\\esp-idf",
     "idf.openOcdConfigs": [
-        "board/esp32c6-ftdi.cfg"
+        "interface/ftdi/esp32_devkitj_v1.cfg",
+        "target/esp32.cfg"
     ],
-    "idf.portWin": "COM4",
-    "idf.toolsPathWin": "c:\\ESPX\\ESPIDF",
+    "idf.portWin": "COM6",
+    "idf.toolsPathWin": "C:\\Users\\arthu\\.espressif",
     "idf.flashType": "UART",
     "files.associations": {
         "*.embeddedhtml": "html",
