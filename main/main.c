@@ -6,6 +6,12 @@
 #include <mpu.h>
 #include <pwm.h>
 
+#define PWM_GPIO       0   // Pino onde o PWM será gerado
+#define PWM_FREQ       5000 // Frequência do PWM em Hz
+#define PWM_RESOLUTION LEDC_TIMER_12_BIT  // Resolução do PWM (13 bits)
+#define PWM_CHANNEL    LEDC_CHANNEL_0    // Canal do PWM
+#define PWM_TIMER      LEDC_TIMER_0      // Temporizador do PWM
+
 void i2c_init(void) {
     i2c_config_t conf = {
     .mode = I2C_MODE_MASTER,
@@ -25,15 +31,8 @@ void i2c_init(void) {
         ESP_LOGI("i2c error", "failed to install the i2c driver");
 }
 
-#define PWM_GPIO       0   // Pino onde o PWM será gerado
-#define PWM_FREQ       5000 // Frequência do PWM em Hz
-#define PWM_RESOLUTION LEDC_TIMER_12_BIT  // Resolução do PWM (13 bits)
-#define PWM_CHANNEL    LEDC_CHANNEL_0    // Canal do PWM
-#define PWM_TIMER      LEDC_TIMER_0      // Temporizador do PWM
-
 int app_main() 
 {
-
     PWM pwm;
 
     pwm_init(&pwm, PWM_GPIO, PWM_CHANNEL, PWM_RESOLUTION, PWM_FREQ);
