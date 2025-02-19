@@ -21,6 +21,7 @@ extern "C"
         uint8_t channel;     /**< Canal LEDC utilizado para o PWM */
         uint8_t resolution;  /**< Resolução do PWM em bits (ex: 10 bits -> valores de 0 a 1023) */
         uint16_t frequency;  /**< Frequência do sinal PWM em Hertz */
+        uint16_t max_duty;  /**< Frequência do sinal PWM em Hertz */
     } PWM;
 
     /**

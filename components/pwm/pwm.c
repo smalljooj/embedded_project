@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "pwm.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
@@ -31,31 +32,31 @@ esp_err_t pwm_init(PWM *pwm, uint8_t pin, uint8_t channel, uint8_t resolution, u
 {
     ESP_LOGW(TAG, "pwm_init() called");
 
-    // Configuração do temporizador do PWM
-    ledc_timer_config_t cfg;
-    cfg.speed_mode = LEDC_LOW_SPEED_MODE;  // Modo de baixa velocidade (baixo consumo de energia)
-    cfg.duty_resolution = resolution;      // Resolução configurada (10 bits padrão)
-    cfg.timer_num = LEDC_TIMER_0;          // Usa o Timer 0
-    cfg.freq_hz = frequency;               // Define a frequência do PWM
-    cfg.clk_cfg = LEDC_AUTO_CLK;           // Seleção automática de clock
-    ledc_timer_config(&cfg);               // Aplica a configuração do temporizador
+    ledc_timer_config_t cfg = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,  // Modo de baixa velocidade (baixo consumo de energia)
+        .duty_resolution = resolution,      // Define resolução
+        .timer_num = LEDC_TIMER_0,          // Usa o Timer 0
+        .freq_hz = frequency,               // Define a frequência do PWM
+        .clk_cfg = LEDC_AUTO_CLK            // Configuração automática do clock
+    };
+    ledc_timer_config(&cfg);                // Aplica a configuração do temporizador
 
-    // Configuração do canal do PWM
-    ledc_channel_config_t cfg2;
-    cfg2.gpio_num = pin;                   // Define o pino GPIO para saída do PWM
-    cfg2.speed_mode = LEDC_LOW_SPEED_MODE; // Modo de baixa velocidade
-    cfg2.channel = channel;                // Define o canal de saída
-    cfg2.intr_type = LEDC_INTR_DISABLE;    // Desativa interrupções
-    cfg2.timer_sel = LEDC_TIMER_0;         // Associa ao Timer 0 configurado anteriormente
-    cfg2.duty = 0;                         // Inicializa com ciclo de trabalho 0%
-    cfg2.hpoint = 0;                       // Define o ponto inicial do PWM
-    ledc_channel_config(&cfg2);            // Aplica a configuração do canal PWM
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num = pin,                    // Define o pino GPIO para saída do PWM
+        .speed_mode = LEDC_LOW_SPEED_MODE,  // Modo de baixa velocidade
+        .channel = channel,                 // Define o canal de saída
+        .timer_sel = LEDC_TIMER_0,          // Associa ao Timer 0 configurado anteriormente
+        .duty = 0,                          // Inicializa com ciclo de trabalho 0%
+        .hpoint = 0                         // Ponto de início do PWM
+    };
+    ledc_channel_config(&ledc_channel);     // Aplica a configuração do canal PWM
 
     // Armazena os valores da configuração na estrutura PWM
     pwm->pin = pin;
     pwm->channel = channel;
     pwm->resolution = resolution;
     pwm->frequency = frequency;
+    pwm->max_duty = pow(2, resolution) - 1;
 
     return ESP_OK; // Retorna sucesso
 }
@@ -71,11 +72,8 @@ esp_err_t pwm_set_duty_cycle(PWM *pwm, uint16_t duty_cycle)
 {
     ESP_LOGW(TAG, "pwm_setPWM() called, duty_cycle: %d", duty_cycle);
 
-    // Calcula o valor máximo de ciclo de trabalho baseado na resolução configurada
-    uint16_t max_duty_cycle = (1 << pwm->resolution) - 1;
-
     // Verifica se o valor do duty cycle é válido
-    if (duty_cycle > max_duty_cycle)
+    if (duty_cycle > pwm->max_duty)
     {
         ESP_LOGE(TAG, "pwm_set_duty_cycle() called with invalid duty_cycle value: %d", duty_cycle);
         return ESP_ERR_INVALID_ARG;
