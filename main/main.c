@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <driver/ledc.h>
+#include <driver/gpio.h>
 #include <ds18b20.h>
 #include <oled_display.h>
 #include <mpu.h>
@@ -11,6 +12,116 @@
 #define PWM_RESOLUTION LEDC_TIMER_12_BIT  // Resolução do PWM (13 bits)
 #define PWM_CHANNEL    LEDC_CHANNEL_0    // Canal do PWM
 #define PWM_TIMER      LEDC_TIMER_0      // Temporizador do PWM
+#define BUZZER 18
+#define R1 8
+#define R2 1
+#define R3 0
+#define R4 7
+#define C1 10
+#define C2 11
+#define C3 12
+#define C4 13
+
+uint8_t keyboard_rows[] = {R1, R2, R3, R4};
+uint8_t keyboard_cols[] = {C1, C2, C3, C4};
+
+void i2c_init(void);
+void init(PWM* pwm);
+void read_keyboard(uint8_t** matriz);
+
+int app_main() 
+{
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;      
+    io_conf.mode = GPIO_MODE_OUTPUT;            
+    io_conf.pin_bit_mask = (1ULL << BUZZER) | (1ULL << R1) | (1ULL << R2) | (1ULL << R3) | (1ULL << R4); 
+    io_conf.pull_down_en = 0;                   
+    io_conf.pull_up_en = 0;                     
+    gpio_config(&io_conf);
+
+    io_conf.intr_type = GPIO_INTR_DISABLE;      
+    io_conf.mode = GPIO_MODE_INPUT;            
+    io_conf.pin_bit_mask = (1ULL << C1) | (1ULL << C2) | (1ULL << C3) | (1ULL << C4); 
+    io_conf.pull_down_en = GPIO_PULLDOWN_ENABLE;                   
+    io_conf.pull_up_en = 0;                     
+    gpio_config(&io_conf);
+
+    gpio_set_level(18, 1);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    gpio_set_level(18, 0);
+    PWM pwm;
+    Angles angles;
+    float temperature;
+    init(&pwm);
+    uint8_t address_count = ds18b20_get_address_count();
+    uint8_t matriz[4][4];
+
+    while(1) {
+
+        read_keyboard(matriz);
+        for (size_t i = 0; i < 4; i++)
+        {
+            for (size_t j = 0; j < 4; j++)        
+            {
+                ESP_LOGI("keyboard", "%d ", matriz[i][j]);
+            }
+            ESP_LOGI("keyboard", "\n ");
+        }
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    }
+
+    /*
+    while(1)
+    {
+        for(int i = 0; i < address_count; i++)
+        {
+            temperature = ds18b20_read_temperature_addr(CELSIUS, i);
+            printf("Temperatura: %.2f °C\n", temperature);
+        }
+        printf("\n");
+        ds18b20_read_addresses();
+        address_count = ds18b20_get_address_count();
+    }
+
+    for (int i = 0; i < 4096; i += 20)
+    {
+        pwm_set_duty_cycle(&pwm, i);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+
+    while (1){
+        angles = calculate_angles_task();
+        vTaskDelay(pdMS_TO_TICKS(500));
+
+    }
+
+    while(1)
+    {
+        oled_display_check();
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+    */
+    
+    return 0;
+}
+
+void read_keyboard(uint8_t** matriz) {
+    gpio_set_level(R1, 0);
+    gpio_set_level(R2, 0);
+    gpio_set_level(R3, 0);
+    gpio_set_level(R4, 0);
+    for (size_t i = 0; i < 4; i++)
+    {
+        gpio_set_level(keyboard_rows[i], 1);
+        for (size_t j = 0; j < 4; j++)
+        {
+           matriz[i][j] = gpio_get_level(keyboard_cols[j]);
+        }
+        gpio_set_level(keyboard_rows[i], 0);
+    }
+    
+}
 
 void i2c_init(void) {
     i2c_config_t conf = {
@@ -31,68 +142,15 @@ void i2c_init(void) {
         ESP_LOGI("i2c error", "failed to install the i2c driver");
 }
 
-int app_main() 
+void init(PWM *pwm) 
 {
-    PWM pwm;
-
-    pwm_init(&pwm, PWM_GPIO, PWM_CHANNEL, PWM_RESOLUTION, PWM_FREQ);
-    for (int i = 0; i < 4096; i += 20)
-    {
-        pwm_set_duty_cycle(&pwm, i);
-        vTaskDelay(1 / portTICK_PERIOD_MS);
-    }
-
-    /*
     i2c_init();
-
+    pwm_init(&pwm, PWM_GPIO, PWM_CHANNEL, PWM_RESOLUTION, PWM_FREQ);
     ds18b20_init();
     ds18b20_read_addresses();
-    uint8_t address_count = ds18b20_get_address_count();
-    ds18b20_adresses_print();
-    float temperature;
-    while(1)
-    {
-        for(int i = 0; i < address_count; i++)
-        {
-            temperature = ds18b20_read_temperature_addr(CELSIUS, i);
-            printf("Temperatura: %.2f °C\n", temperature);
-        }
-        printf("\n");
-        ds18b20_read_addresses();
-        address_count = ds18b20_get_address_count();
-    }
-
-
-    // -------------------------------
-    Angles angles;
     init_mpu6050();
-    while (1){
-        angles = calculate_angles_task();
-        vTaskDelay(pdMS_TO_TICKS(500));
-
-    }
-
-    // ----------------------------------
-    
-
     oled_display_init();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-    // select the entire display
     oled_display_set_column_addresses(0, 127);
     oled_display_set_page_addresses(0, 7);
-
     oled_display_set_cursor(0, 0);
-    oled_display_write_text("Hello, are you \nok?", 19);
-    oled_display_draw_line(0, 25, 127, 25);
-    oled_display_draw_rectangle(35, 35, 55, 55);
-    oled_display_draw_triangle(70, 55, 100, 55, 85, 35);
-    oled_display_update_buffer();
-    while(1)
-    {
-        oled_display_check();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    */
-    return 0;
 }

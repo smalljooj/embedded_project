@@ -1,7 +1,7 @@
 #ifndef DS18B20_H
 #define DS18B20_H
 
-#define DS18B20_PIN 4
+#define DS18B20_PIN 9
 
 typedef enum {
     CELSIUS,
