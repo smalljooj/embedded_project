@@ -15,19 +15,19 @@
 #define BUZZER 18
 #define R1 8
 #define R2 1
-#define R3 0
-#define R4 7
+#define R3 7
+#define R4 4
 #define C1 10
 #define C2 11
 #define C3 12
 #define C4 13
 
-uint8_t keyboard_rows[] = {R1, R2, R3, R4};
-uint8_t keyboard_cols[] = {C1, C2, C3, C4};
+uint8_t keyboard_rows[4] = {R1, R2, R3, R4};
+uint8_t keyboard_cols[4] = {C1, C2, C3, C4};
 
 void i2c_init(void);
 void init(PWM* pwm);
-void read_keyboard(uint8_t** matriz);
+void read_keyboard(uint8_t matriz[4][4]);
 
 int app_main() 
 {
@@ -46,8 +46,8 @@ int app_main()
     io_conf.pull_up_en = 0;                     
     gpio_config(&io_conf);
 
-    gpio_set_level(18, 1);
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    //gpio_set_level(18, 1);
+    //vTaskDelay(2000 / portTICK_PERIOD_MS);
     gpio_set_level(18, 0);
     PWM pwm;
     Angles angles;
@@ -59,16 +59,14 @@ int app_main()
     while(1) {
 
         read_keyboard(matriz);
-        for (size_t i = 0; i < 4; i++)
+        for (uint8_t i = 0; i < 4; i++)
         {
-            for (size_t j = 0; j < 4; j++)        
-            {
-                ESP_LOGI("keyboard", "%d ", matriz[i][j]);
-            }
-            ESP_LOGI("keyboard", "\n ");
+            for (uint8_t j = 0; j < 4; j++)
+                printf("%d - ", matriz[i][j]);
+            printf("\n");
         }
+        printf("\n");
         vTaskDelay(500 / portTICK_PERIOD_MS);
-
     }
 
     /*
@@ -106,20 +104,23 @@ int app_main()
     return 0;
 }
 
-void read_keyboard(uint8_t** matriz) {
+void read_keyboard(uint8_t matriz[4][4]) {
     gpio_set_level(R1, 0);
     gpio_set_level(R2, 0);
     gpio_set_level(R3, 0);
     gpio_set_level(R4, 0);
-    for (size_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < 4; i++)
     {
         gpio_set_level(keyboard_rows[i], 1);
-        for (size_t j = 0; j < 4; j++)
+        for (uint8_t j = 0; j < 4; j++)
         {
            matriz[i][j] = gpio_get_level(keyboard_cols[j]);
+           printf("%d - ", gpio_get_level(keyboard_cols[j]));
         }
         gpio_set_level(keyboard_rows[i], 0);
+        printf("\n");
     }
+    printf("\n");
     
 }
 
