@@ -56,6 +56,15 @@ int app_main()
     uint8_t address_count = ds18b20_get_address_count();
     uint8_t matriz[4][4];
 
+
+    oled_display_write_text("Digite a senha:\n", 16);
+    oled_display_write_text("    _ _ _ _", 11);
+    oled_display_update_buffer();
+    // menu 
+
+
+
+    /*
     while(1) {
 
         read_keyboard(matriz);
@@ -69,7 +78,7 @@ int app_main()
         vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 
-    /*
+    
     while(1)
     {
         for(int i = 0; i < address_count; i++)
