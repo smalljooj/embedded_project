@@ -7,12 +7,12 @@
 #include <mpu.h>
 #include <pwm.h>
 
-#define PWM_GPIO       0   // Pino onde o PWM será gerado
-#define PWM_FREQ       5000 // Frequência do PWM em Hz
-#define PWM_RESOLUTION LEDC_TIMER_12_BIT  // Resolução do PWM (13 bits)
-#define PWM_CHANNEL    LEDC_CHANNEL_0    // Canal do PWM
+#define PWM_GPIO       2   // Pino onde o PWM será gerado
+#define PWM_FREQ       50 // Frequência do PWM em Hz
+#define PWM_RESOLUTION LEDC_TIMER_12_BIT  // Resolução do PWM (12 bits)
+#define PWM_CHANNEL    LEDC_CHANNEL_2    // Canal do PWM
 #define PWM_TIMER      LEDC_TIMER_0      // Temporizador do PWM
-#define BUZZER 18
+#define BUZZER 3
 #define R1 8
 #define R2 1
 #define R3 7
@@ -28,6 +28,7 @@ uint8_t keyboard_cols[4] = {C1, C2, C3, C4};
 void i2c_init(void);
 void init(PWM* pwm);
 void read_keyboard(uint8_t matriz[4][4]);
+int8_t get_keyboard_number(uint8_t matriz[4][4]);
 
 int app_main() 
 {
@@ -46,13 +47,19 @@ int app_main()
     io_conf.pull_up_en = 0;                     
     gpio_config(&io_conf);
 
-    //gpio_set_level(18, 1);
-    //vTaskDelay(2000 / portTICK_PERIOD_MS);
-    gpio_set_level(18, 0);
+    gpio_set_level(BUZZER, 1);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    gpio_set_level(BUZZER, 0);
+
     PWM pwm;
     Angles angles;
     float temperature;
     init(&pwm);
+    for(int i = 200; i <= 450; i += 10)
+    {
+        pwm_set_duty_cycle(&pwm, i);
+        vTaskDelay(50 / portTICK_PERIOD_MS);
+    }
     uint8_t address_count = ds18b20_get_address_count();
     uint8_t matriz[4][4];
 
@@ -62,6 +69,15 @@ int app_main()
     oled_display_update_buffer();
     // menu 
 
+    while(1) 
+    {
+        read_keyboard(matriz);
+        if (get_keyboard_number(matriz) != -1)
+            printf("%d\n", get_keyboard_number(matriz));
+        temperature = ds18b20_read_temperature_addr(CELSIUS, 0);
+        printf("Temperatura: %.2f °C\n", temperature);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
 
 
     /*
@@ -124,13 +140,21 @@ void read_keyboard(uint8_t matriz[4][4]) {
         for (uint8_t j = 0; j < 4; j++)
         {
            matriz[i][j] = gpio_get_level(keyboard_cols[j]);
-           printf("%d - ", gpio_get_level(keyboard_cols[j]));
         }
         gpio_set_level(keyboard_rows[i], 0);
-        printf("\n");
     }
-    printf("\n");
-    
+}
+
+int8_t get_keyboard_number(uint8_t matriz[4][4]) {
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        for (uint8_t j = 0; j < 4; j++)
+        {
+            if (matriz[i][j])
+                return i * 4 + j;
+        }
+    }
+    return -1;
 }
 
 void i2c_init(void) {
@@ -155,10 +179,10 @@ void i2c_init(void) {
 void init(PWM *pwm) 
 {
     i2c_init();
-    pwm_init(&pwm, PWM_GPIO, PWM_CHANNEL, PWM_RESOLUTION, PWM_FREQ);
+    pwm_init(pwm, PWM_GPIO, PWM_CHANNEL, PWM_RESOLUTION, PWM_FREQ);
     ds18b20_init();
     ds18b20_read_addresses();
-    init_mpu6050();
+    //init_mpu6050();
     oled_display_init();
     oled_display_set_column_addresses(0, 127);
     oled_display_set_page_addresses(0, 7);
