@@ -17,5 +17,8 @@
         "ledc.h": "c",
         "mpu.h": "c"
     },
-    "idf.pythonInstallPath": "c:\\Users\\ismae\\Documents\\espressif\\tools\\tools\\idf-python\\3.11.2\\python.exe"
+    "idf.pythonInstallPath": "c:\\Users\\ismae\\Documents\\espressif\\tools\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.customExtraVars": {
+        "IDF_TARGET": "esp32c6"
+    }
 }

@@ -12,6 +12,10 @@ void oled_display_clear(void)
     {
         oled_display_write_data(clear, 128);
     }
+    for (uint16_t i = 0; i < ((DISPLAY_HEIGHT / 8) * DISPLAY_WIDTH); i++)
+    {
+        display_buffer[i] = 0;
+    }
 }
 
 void oled_display_draw_pixel(uint8_t x, uint8_t y, uint8_t pixel_state) 
@@ -22,7 +26,7 @@ void oled_display_draw_pixel(uint8_t x, uint8_t y, uint8_t pixel_state)
         display_buffer[x + (DISPLAY_WIDTH * (y / 8))] &= ~(pixel_state << (y % 8));
 }
 
-void oled_display_draw_line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) 
+void oled_display_draw_line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t pixel_state) 
 {
     vector2d vector = {.x = x2 - x1, .y = y2 - y1}; 
     uint8_t x, y;
@@ -35,11 +39,11 @@ void oled_display_draw_line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
         offset_y = (vector.y * i);
         x = x1 + offset_x;
         y = y1 + offset_y;
-        oled_display_draw_pixel(x, y, 1);
+        oled_display_draw_pixel(x, y, pixel_state);
     }
 }
 
-void oled_display_draw_rectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) 
+void oled_display_draw_rectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t pixel_state) 
 {
     uint8_t y1_, y2_;
     if (y1 > y2) 
@@ -53,7 +57,7 @@ void oled_display_draw_rectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
         y2_ = y2;
     } 
     for(int i = 0; i < y2_ - y1_; i++)
-        oled_display_draw_line(x1, y1_ + i, x2, y1_ + i);
+        oled_display_draw_line(x1, y1_ + i, x2, y1_ + i, pixel_state);
 }
 
 void oled_display_draw_triangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3)
