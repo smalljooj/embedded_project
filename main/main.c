@@ -35,6 +35,7 @@ void i2c_init(void);
 void init_modules(PWM* servo);
 void read_keyboard(uint8_t matriz[4][4]);
 int8_t get_keyboard_number(uint8_t matriz[4][4]);
+void mpu_recalibrate();
 
 void write_password(int32_t password);
 int32_t read_password();
@@ -42,6 +43,8 @@ int32_t read_password();
 void open_safe_door(PWM* servo);
 void close_safe_door(PWM* servo);
 void beep();
+
+float x_m = 0, y_m = 0, z_m = 0;
 
 
 void show_menu_display();
@@ -51,9 +54,18 @@ void show_change_password_display();
 
 int8_t check_integrity()
 {
-    float temperature;
+    float temperature, accel_x, accel_y, accel_z;
     temperature = ds18b20_read_temperature_addr(CELSIUS, 0);
-    //printf("Temperatura: %.2f °C\n", temperature);
+    accel_x = mpu6050_read_accel_x();
+    accel_y = mpu6050_read_accel_y();
+    accel_z = mpu6050_read_accel_z();
+
+    if ((accel_x < (x_m - 0.6) || accel_x > (x_m + 0.6)) || 
+        (accel_y < (y_m - 0.6) || accel_y > (y_m + 0.6)) || 
+        (accel_z < (z_m - 0.6) || accel_z > (z_m + 0.6)))
+    {
+        return -1;
+    }
     if(temperature > 40)
         return -1;
     return 0;
@@ -79,6 +91,7 @@ int app_main()
         if (open_menu)
         {
             keyboard_number = get_keyboard_number(matriz);
+            mpu_recalibrate();
             if (keyboard_number != -1 && keyboard_number != keyboard_last_number)
             {
                if (keyboard_number == 3)
@@ -158,6 +171,7 @@ int app_main()
             {
                 show_locked_display();
                 should_beep = 1;
+                password_read = 0;
                 if (get_keyboard_number(matriz) == 12)
                 {
                     current_millis = esp_timer_get_time() / 1000;
@@ -180,6 +194,19 @@ int app_main()
     }
     nvs_close(my_handle);
     return 0;
+}
+
+void mpu_recalibrate()
+{
+    for(int i = 0; i < 50; i++)
+    {
+        x_m += mpu6050_read_accel_x();
+        y_m += mpu6050_read_accel_y();
+        z_m += mpu6050_read_accel_z();
+    }
+    x_m /= 50;
+    y_m /= 50;
+    z_m /= 50;
 }
 
 void show_menu_display()
@@ -298,9 +325,13 @@ void init_modules(PWM *servo)
 {
     i2c_init();
     pwm_init(servo, PWM_GPIO, PWM_CHANNEL, PWM_RESOLUTION, PWM_FREQ);
+
     ds18b20_init();
     ds18b20_read_addresses();
-    //init_mpu6050();
+
+    init_mpu6050();
+    mpu_recalibrate();
+
     oled_display_init();
     oled_display_set_column_addresses(0, 127);
     oled_display_set_page_addresses(0, 7);

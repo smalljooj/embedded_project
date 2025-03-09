@@ -145,7 +145,7 @@ esp_err_t init_mpu6050() {
     ESP_LOGI(TAG, "Calculando erros iniciais...");
     // Calcular erros de acelerômetro -> dispositivo deve estar parado
     // media de 500 amostras para minimizar efeito dos ruídos
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 50; i++) {
         accRaw[0] = mpu6050_read_accel_x();
         accRaw[1] = mpu6050_read_accel_y();
         accRaw[2] = mpu6050_read_accel_z();
@@ -161,7 +161,7 @@ esp_err_t init_mpu6050() {
     accError[1] /= 500.0;
 
     // Calcular erros de giroscópio
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 50; i++) {
         gyrRaw[0] = mpu6050_read_gyro_x();
         gyrRaw[1] = mpu6050_read_gyro_y();
         gyrRaw[2] = mpu6050_read_gyro_z();
@@ -295,7 +295,6 @@ float mpu6050_read_gyro_x(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         gyro_x = (int16_t)((data[0] << 8) | data[1]);
-        ESP_LOGI("mpu6050", "Gyro X: %f",(float) gyro_x / (131.0));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -311,7 +310,6 @@ float mpu6050_read_gyro_x(void) {
         
         return 0;
     }
-
 
 }
 
@@ -342,7 +340,6 @@ float mpu6050_read_gyro_y(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         gyro_y = (int16_t)((data[0] << 8) | data[1]);
-        ESP_LOGI("mpu6050", "Gyro Y: %f",(float) gyro_y / (131.0));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -386,7 +383,6 @@ float mpu6050_read_gyro_z(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         gyro_z = (int16_t)((data[0] << 8) | data[1]);
-        ESP_LOGI("mpu6050", "Gyro Z: %f", (float) gyro_z / (131.0));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -432,7 +428,6 @@ float mpu6050_read_accel_x(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         accel_x = (int16_t)((data[0] << 8) | data[1]);
-        ESP_LOGI("mpu6050", "Accel X: %f", (float) accel_x/ (16384));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -477,7 +472,6 @@ float mpu6050_read_accel_y(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         accel_y = (int16_t)((data[0] << 8) | data[1]);
-        ESP_LOGI("mpu6050", "Accel Y: %f", (float) accel_y/ (16384));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
@@ -524,7 +518,6 @@ float mpu6050_read_accel_z(void) {
     if (ret == ESP_OK) {
         // Combina os bytes lidos
         accel_z = (int16_t)((data[0] << 8) | data[1]);
-        ESP_LOGI("mpu6050", "Accel Z: %f", (float) accel_z/ (16384));
 
         // Libera o comando I²C
         i2c_cmd_link_delete(link);
